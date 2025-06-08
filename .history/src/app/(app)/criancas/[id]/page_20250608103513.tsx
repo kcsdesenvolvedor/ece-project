@@ -11,9 +11,17 @@ type ChildDetails = { name: string | null; /* ...outras props... */ plan_name: s
 type AttendanceRecord = { date: string; status: string; };
 
 
-export default async function ChildDetailPage({ params }: { params: { id: string } }) {
+
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default async function ChildDetailPage(props: PageProps) {
+  const { id: childId } = props.params; // Desestruturar aqui
   const supabase = await createClient();
-  const childId = params.id;
+  //const childId = params.id;
 
   // Busca os dados INICIAIS (perfil + primeiro mês de presença)
   const [detailsResponse, initialAttendanceResponse] = await Promise.all([

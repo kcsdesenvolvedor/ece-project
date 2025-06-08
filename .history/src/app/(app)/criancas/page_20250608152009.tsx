@@ -15,13 +15,15 @@ export type ChildListItem = {
   start_date: string;
 };
 
-
-export default async function ChildrenListPage({ searchParams }: {
+// 2. A página agora aceita `searchParams` como prop
+interface ChildrenListPageProps {
   searchParams?: {
     plan?: string;
     search?: string;
   };
-}) {
+}
+
+export default async function ChildrenListPage({ searchParams }: ChildrenListPageProps) {
   const supabase = await createClient();
 
   // 3. Extrair os valores dos filtros da URL, com fallbacks
