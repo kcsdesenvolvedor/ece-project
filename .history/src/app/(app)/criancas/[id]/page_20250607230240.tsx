@@ -10,18 +10,11 @@ import { AttendanceCalendar } from './attendance-calendar'; // Importa nosso nov
 type ChildDetails = { name: string | null; /* ...outras props... */ plan_name: string | null; guardian_name: string | null; guardian_phone: string | null; allergies: string | null; medical_notes: string | null; };
 type AttendanceRecord = { date: string; status: string; };
 
+interface PageProps { params: { id: string; }; }
 
-
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function ChildDetailPage(props: PageProps) {
-  const { id: childId } = props.params; // Desestruturar aqui
+export default async function ChildDetailPage({ params }: PageProps) {
   const supabase = await createClient();
-  //const childId = params.id;
+  const childId = params.id;
 
   // Busca os dados INICIAIS (perfil + primeiro mês de presença)
   const [detailsResponse, initialAttendanceResponse] = await Promise.all([

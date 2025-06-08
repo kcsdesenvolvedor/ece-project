@@ -12,27 +12,27 @@ interface EditChildPageProps {
   };
 }
 
-export default async function EditChildPage(props: EditChildPageProps) {
-  // 2. Acessar 'params' a partir de 'props'
-  const { id } = props.params;
+export default async function EditChildPage({ params }: EditChildPageProps) {
   const supabase = await createClient();
 
+  // 2. Aplicar o tipo <ChildEditData> à chamada do Supabase
   const { data: childData, error } = await supabase
-    .rpc('get_child_for_editing', { p_child_id: id }) // Usar o 'id' desestruturado
-    .single<ChildEditData>();
+    .rpc('get_child_for_editing', { p_child_id: params.id })
+    .single<ChildEditData>(); // <- AQUI ESTÁ A CORREÇÃO
 
   if (error || !childData) {
     notFound();
   }
 
+  // 3. Agora o TypeScript sabe que childData tem as propriedades corretas
   return (
     <ChildForm
       action={updateChild}
       initialData={childData}
       buttonText="Salvar Alterações"
-      childId={id} // Passar o 'id' aqui
-      guardianId={childData.guardian_id!}
-      enrollmentId={childData.enrollment_id!}
+      childId={params.id}
+      guardianId={childData.guardian_id!} // Adicionamos '!' para afirmar que não será nulo
+      enrollmentId={childData.enrollment_id!} // Adicionamos '!' para afirmar que não será nulo
     />
   );
 }
