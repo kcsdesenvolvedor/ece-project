@@ -7,11 +7,11 @@ import { updateChild } from '../../actions';
 
 
 // Tipar diretamente na assinatura da função
-export default async function EditChildPage({ params }: { params: { id: string } }) {
+export default async function EditChildPage( params : { params: { id: string } }) {
   const supabase = await createClient();
 
   const { data: childData, error } = await supabase
-    .rpc('get_child_for_editing', { p_child_id: params.id })
+    .rpc('get_child_for_editing', { p_child_id: params.params.id })
     .single<ChildEditData>();
 
   if (error || !childData) {
@@ -23,7 +23,7 @@ export default async function EditChildPage({ params }: { params: { id: string }
       action={updateChild}
       initialData={childData}
       buttonText="Salvar Alterações"
-      childId={params.id}
+      childId={params.params.id}
       guardianId={childData.guardian_id!}
       enrollmentId={childData.enrollment_id!}
     />
