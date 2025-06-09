@@ -16,17 +16,13 @@ export type ChildListItem = {
 };
 
 
-export default async function ChildrenListPage({ searchParams }: {
-  searchParams?: {
-    plan?: string;
-    search?: string;
-  };
+export default async function ChildrenListPage({ searchParams }: { 
+  searchParams: Promise<{ plan?: string; search?: string; }> 
 }) {
   const supabase = await createClient();
-
-  // 3. Extrair os valores dos filtros da URL, com fallbacks
-  const planName = searchParams?.plan || null;
-  const searchTerm = searchParams?.search || null;
+  const resolvedSearchParams = await searchParams;
+  const planName = resolvedSearchParams?.plan || null;
+  const searchTerm = resolvedSearchParams?.search || null;
 
   // 4. Chamar a RPC com os parâmetros de filtro
   const { data: children, error } = await supabase.rpc('get_children_list', {
