@@ -42,7 +42,7 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
           <CardHeader><CardTitle>Detalhes da Matrícula</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             <p><span className="font-semibold">Plano:</span> <Badge>{details.plan_name ?? 'N/A'}</Badge></p>
-            {details.discount && details.discount > 0 && (
+            {details.discount != null && Number(details.discount) > 0 && (
               <p>
                 <span className="font-semibold">Desconto Mensal:</span> 
                 <span className="text-green-600 font-bold ml-2">
