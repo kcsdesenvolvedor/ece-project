@@ -4,6 +4,7 @@
 import { useActionState } from 'react'; // CORRETO: useActionState vem de 'react'
 import { useFormStatus } from 'react-dom'; // CORRETO: useFormStatus vem de 'react-dom'
 import { type FormState } from './actions';
+import { useIMask } from 'react-imask'; // 1. Importar o hook da nova biblioteca
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,13 +52,17 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
   const initialState: FormState = { message: '', errors: {} };
   const [state, dispatch] = useActionState(action, initialState);
 
+  // 2. Configurar o hook da máscara para o CPF
+  const { ref: cpfRef, value: cpfValue } = useIMask({
+    mask: '000.000.000-00',
+  });
+
   const plans = [
     {id: 1, name: "Integral"},
     {id: 2, name: "Meio Período"},
     {id: 3, name: "Diária"},
   ];
 
-  // Adicionando uma variável para a data de início para maior clareza
   const startDateValue = initialData?.birth_date
     ? format(new Date(initialData.birth_date + 'T00:00:00'), 'yyyy-MM-dd')
     : new Date().toISOString();
@@ -117,21 +122,33 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
             <Input id="guardianName" name="guardianName" defaultValue={initialData?.guardian_name ?? ''} />
              {state.errors?.guardianName && <p className="text-sm font-medium text-destructive">{state.errors.guardianName}</p>}
           </div>
-           <div className="space-y-2">
-            <Label htmlFor="guardianCpf">CPF</Label>
-            <Input id="guardianCpf" name="guardianCpf" placeholder="000.000.000-00" defaultValue={initialData?.guardian_cpf ?? ''} />
-             {state.errors?.guardianCpf && <p className="text-sm font-medium text-destructive">{state.errors.guardianCpf}</p>}
+           
+           {/* 3. Alteração no campo de CPF */}
+          <div className="space-y-2">
+            <Label htmlFor="guardianCpf">CPF (Opcional)</Label>
+            <Input
+              id="guardianCpf"
+              name="guardianCpf"
+              placeholder="000.000.000-00"
+              defaultValue={initialData?.guardian_cpf ?? ''}
+              // @ts-ignore - a ref do useIMask é compatível
+              ref={cpfRef}
+            />
+            {state.errors?.guardianCpf && <p className="text-sm font-medium text-destructive">{state.errors.guardianCpf}</p>}
           </div>
-           <div className="space-y-2">
-            <Label htmlFor="guardianPhone">Telefone/WhatsApp</Label>
+          
+          <div className="space-y-2">
+            <Label htmlFor="guardianPhone">Telefone/WhatsApp (Opcional)</Label>
             <Input id="guardianPhone" name="guardianPhone" placeholder="(00) 00000-0000" defaultValue={initialData?.guardian_phone ?? ''} />
              {state.errors?.guardianPhone && <p className="text-sm font-medium text-destructive">{state.errors.guardianPhone}</p>}
           </div>
-           <div className="space-y-2">
-            <Label htmlFor="guardianEmail">Email</Label>
+
+          <div className="space-y-2">
+            <Label htmlFor="guardianEmail">Email (Opcional)</Label>
             <Input id="guardianEmail" name="guardianEmail" type="email" placeholder="responsavel@email.com" defaultValue={initialData?.guardian_email ?? ''}/>
              {state.errors?.guardianEmail && <p className="text-sm font-medium text-destructive">{state.errors.guardianEmail}</p>}
           </div>
+
         </CardContent>
       </Card>
 

@@ -14,9 +14,10 @@ const FormSchema = z.object({
   medicalNotes: z.string().optional(),
   imageAuth: z.boolean().default(false),
   guardianName: z.string().min(3, { message: "Nome do responsável deve ter no mínimo 3 caracteres." }),
-  guardianCpf: z.string().length(14, { message: "CPF inválido." }), // Ex: 123.456.789-10
-  guardianPhone: z.string().min(14, { message: "Telefone inválido." }), // Ex: (11) 99999-9999
-  guardianEmail: z.string().email({ message: "Email inválido." }),
+  guardianCpf: z.string().optional().or(z.literal('')),
+  guardianPhone: z.string().optional().or(z.literal('')),
+  guardianEmail: z.string().email({ message: "Formato de email inválido." }).optional().or(z.literal('')),
+  
   planId: z.coerce.number().min(1, { message: "Selecione um plano." }),
   startDate: z.string().refine((date) => !isNaN(new Date(date).getTime()), { message: "Data de início inválida." }),
 })
