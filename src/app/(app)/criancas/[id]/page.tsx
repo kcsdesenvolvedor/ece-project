@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AttendanceCalendar } from './attendance-calendar';
 
-type ChildDetails = { name: string | null; plan_name: string | null; guardian_name: string | null; guardian_phone: string | null; allergies: string | null; medical_notes: string | null; };
+type ChildDetails = { name: string | null; plan_name: string | null; guardian_name: string | null; guardian_phone: string | null; allergies: string | null; medical_notes: string | null; discount: number | null; };
 type AttendanceRecord = { date: string; status: string; };
 
 export default async function ChildDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -42,6 +42,14 @@ export default async function ChildDetailPage({ params }: { params: Promise<{ id
           <CardHeader><CardTitle>Detalhes da Matrícula</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             <p><span className="font-semibold">Plano:</span> <Badge>{details.plan_name ?? 'N/A'}</Badge></p>
+            {details.discount && details.discount > 0 && (
+              <p>
+                <span className="font-semibold">Desconto Mensal:</span> 
+                <span className="text-green-600 font-bold ml-2">
+                  - {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(details.discount)}
+                </span>
+              </p>
+            )}
             <p><span className="font-semibold">Responsável:</span> {details.guardian_name ?? 'N/A'}</p>
             <p><span className="font-semibold">Telefone:</span> {details.guardian_phone ?? 'N/A'}</p>
           </CardContent>

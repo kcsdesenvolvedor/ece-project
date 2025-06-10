@@ -14,11 +14,24 @@ const FormSchema = z.object({
   medicalNotes: z.string().optional(),
   imageAuth: z.boolean().default(false),
   guardianName: z.string().min(3, { message: "Nome do responsável deve ter no mínimo 3 caracteres." }),
-  guardianCpf: z.string().optional().or(z.literal('')),
-  guardianPhone: z.string().optional().or(z.literal('')),
-  guardianEmail: z.string().email({ message: "Formato de email inválido." }).optional().or(z.literal('')),
+  guardianCpf: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().nullable().optional()
+  ),
+  guardianPhone: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().nullable().optional()
+  ),
+  guardianEmail: z.preprocess(
+    (val) => (val === "" ? null : val),
+    z.string().email({ message: "Formato de email inválido." }).nullable().optional()
+  ),
   
   planId: z.coerce.number().min(1, { message: "Selecione um plano." }),
+  discount: z.preprocess(
+    (val) => (val === '' ? undefined : val), // Trata string vazia como undefined
+    z.coerce.number().min(0, "O desconto não pode ser negativo.").optional()
+  ),
   startDate: z.string().refine((date) => !isNaN(new Date(date).getTime()), { message: "Data de início inválida." }),
 })
 
@@ -46,6 +59,7 @@ export async function registerChild(prevState: FormState, formData: FormData): P
     guardianEmail: formData.get('guardianEmail'),
     planId: formData.get('planId'),
     startDate: formData.get('startDate'),
+    discount: formData.get('discount'),
   }
 
   // Validar os dados com Zod
@@ -74,6 +88,7 @@ export async function registerChild(prevState: FormState, formData: FormData): P
     guardian_email: data.guardianEmail,
     plan_id_to_enroll: data.planId,
     enrollment_start_date: data.startDate,
+    p_discount: data.discount ?? 0,
   })
 
 
@@ -148,6 +163,7 @@ export async function updateChild(prevState: FormState, formData: FormData): Pro
       guardianEmail: formData.get('guardianEmail'),
       planId: formData.get('planId'),
       startDate: formData.get('startDate'), // Embora não seja editado, precisa estar no schema
+      discount: formData.get('discount'),
     };
   
     // Reutilizamos o mesmo schema de validação
@@ -179,6 +195,7 @@ export async function updateChild(prevState: FormState, formData: FormData): Pro
       p_guardian_email: data.guardianEmail,
       p_enrollment_id: enrollmentId,
       p_plan_id_to_enroll: data.planId,
+      p_discount: data.discount ?? 0,
     });
   
     if (error) {

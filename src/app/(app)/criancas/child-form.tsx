@@ -28,6 +28,7 @@ export type ChildEditData = {
     guardian_email: string | null;
     enrollment_id: string | null;
     plan_id: number | null;
+    discount: number | null;
 };
 
 interface ChildFormProps {
@@ -174,6 +175,19 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
                   <Label htmlFor="startDate">Data de Início (Não editável)</Label>
                   <Input readOnly disabled defaultValue={startDateDisplay}/>
                   <input type="hidden" name="startDate" defaultValue={startDateValue} />
+              </div>
+              {/* NOVO Campo de Desconto */}
+              <div className="space-y-2">
+                  <Label htmlFor="discount">Desconto Mensal (R$)</Label>
+                  <Input
+                      id="discount"
+                      name="discount"
+                      type="number"
+                      placeholder="Ex: 50.00"
+                      step="0.01"
+                      defaultValue={initialData?.discount ?? 0}
+                  />
+                  {state.errors?.discount && <p className="text-sm font-medium text-destructive">{state.errors.discount}</p>}
               </div>
           </CardContent>
       </Card>
