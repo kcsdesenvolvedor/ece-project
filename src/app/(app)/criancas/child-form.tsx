@@ -53,7 +53,7 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
   const [state, dispatch] = useActionState(action, initialState);
 
   // 2. Configurar o hook da máscara para o CPF
-  const { ref: cpfRef, value: cpfValue } = useIMask({
+  const { ref: cpfRef } = useIMask({
     mask: '000.000.000-00',
   });
 
@@ -131,7 +131,7 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
               name="guardianCpf"
               placeholder="000.000.000-00"
               defaultValue={initialData?.guardian_cpf ?? ''}
-              // @ts-ignore - a ref do useIMask é compatível
+              // @ts-expect-error - A ref do useIMask é funcionalmente compatível com o Input do Shadcn
               ref={cpfRef}
             />
             {state.errors?.guardianCpf && <p className="text-sm font-medium text-destructive">{state.errors.guardianCpf}</p>}
