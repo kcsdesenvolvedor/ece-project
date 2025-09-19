@@ -79,7 +79,7 @@ export default function DashboardLayout({
               </Link>
             </nav>
           </div>
-          <div className="mt-auto p-4">
+          <div className="mt-4 p-4">
              <form action={logout}>
                 <Button size="sm" className="w-full">
                     <LogOut className="mr-2 h-4 w-4"/> Sair
@@ -154,7 +154,7 @@ export default function DashboardLayout({
                   Configurações
                 </Link>
               </nav>
-              <div className="mt-auto">
+              <div className="mt-4">
                 <form action={logout}>
                     <Button size="sm" className="w-full">
                         <LogOut className="mr-2 h-4 w-4"/> Sair

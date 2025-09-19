@@ -13,6 +13,7 @@ const FormSchema = z.object({
   allergies: z.string().optional(),
   medicalNotes: z.string().optional(),
   imageAuth: z.boolean().default(false),
+  avatarUrl: z.string().url("URL da imagem inválida").optional().nullable(),
   guardianName: z.string().min(3, { message: "Nome do responsável deve ter no mínimo 3 caracteres." }),
   guardianCpf: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -31,6 +32,10 @@ const FormSchema = z.object({
   discount: z.preprocess(
     (val) => (val === '' ? undefined : val), // Trata string vazia como undefined
     z.coerce.number().min(0, "O desconto não pode ser negativo.").optional()
+  ),
+  surcharge: z.preprocess(
+    (val) => (val === '' || val === null ? 0 : val),
+    z.coerce.number().min(0, "O acréscimo não pode ser negativo.").default(0)
   ),
   startDate: z.string().refine((date) => !isNaN(new Date(date).getTime()), { message: "Data de início inválida." }),
 })
@@ -53,6 +58,7 @@ export async function registerChild(prevState: FormState, formData: FormData): P
     allergies: formData.get('allergies'),
     medicalNotes: formData.get('medicalNotes'),
     imageAuth: formData.get('imageAuth') === 'on',
+    avatarUrl: formData.get('avatarUrl'),
     guardianName: formData.get('guardianName'),
     guardianCpf: formData.get('guardianCpf'),
     guardianPhone: formData.get('guardianPhone'),
@@ -60,6 +66,7 @@ export async function registerChild(prevState: FormState, formData: FormData): P
     planId: formData.get('planId'),
     startDate: formData.get('startDate'),
     discount: formData.get('discount'),
+    surcharge: formData.get('surcharge'),
   }
 
   // Validar os dados com Zod
@@ -89,6 +96,7 @@ export async function registerChild(prevState: FormState, formData: FormData): P
     plan_id_to_enroll: data.planId,
     enrollment_start_date: data.startDate,
     p_discount: data.discount ?? 0,
+    p_surcharge: data.surcharge ?? 0,
   })
 
 
@@ -144,8 +152,6 @@ export async function deleteChild(formData: FormData) {
     return data;
   }
 
-
-  // ... (mantenha a action registerChild, o schema e os tipos existentes) ...
 // Adicione esta nova action
 export async function updateChild(prevState: FormState, formData: FormData): Promise<FormState> {
     const supabase = await createClient();
@@ -157,6 +163,7 @@ export async function updateChild(prevState: FormState, formData: FormData): Pro
       allergies: formData.get('allergies'),
       medicalNotes: formData.get('medicalNotes'),
       imageAuth: formData.get('imageAuth') === 'on',
+      avatarUrl: formData.get('avatarUrl'),
       guardianName: formData.get('guardianName'),
       guardianCpf: formData.get('guardianCpf'),
       guardianPhone: formData.get('guardianPhone'),
@@ -164,6 +171,7 @@ export async function updateChild(prevState: FormState, formData: FormData): Pro
       planId: formData.get('planId'),
       startDate: formData.get('startDate'), // Embora não seja editado, precisa estar no schema
       discount: formData.get('discount'),
+      surcharge: formData.get('surcharge'),
     };
   
     // Reutilizamos o mesmo schema de validação
@@ -188,6 +196,7 @@ export async function updateChild(prevState: FormState, formData: FormData): Pro
       p_allergies: data.allergies,
       p_medical_notes: data.medicalNotes,
       p_image_auth: data.imageAuth,
+      p_avatar_url: data.avatarUrl,
       p_guardian_id: guardianId,
       p_guardian_name: data.guardianName,
       p_guardian_cpf: data.guardianCpf,
@@ -196,6 +205,7 @@ export async function updateChild(prevState: FormState, formData: FormData): Pro
       p_enrollment_id: enrollmentId,
       p_plan_id_to_enroll: data.planId,
       p_discount: data.discount ?? 0,
+      p_surcharge: data.surcharge ?? 0,
     });
   
     if (error) {

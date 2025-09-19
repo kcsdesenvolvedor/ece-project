@@ -6,6 +6,7 @@ import { AttendanceList } from './attendance-list';
 export type AttendanceChild = {
   id: string;
   name: string;
+  avatar_url: string | null;
   status: 'present' | 'absent' | null;
 }
 

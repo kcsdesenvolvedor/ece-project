@@ -1,7 +1,8 @@
 // app/(app)/criancas/child-form.tsx (Import Corrigido)
 'use client'
 
-import { useActionState } from 'react'; // CORRETO: useActionState vem de 'react'
+import { useActionState, useState } from 'react'; // CORRETO: useActionState vem de 'react'
+import { createClient } from '@/lib/supabase/client';
 import { useFormStatus } from 'react-dom'; // CORRETO: useFormStatus vem de 'react-dom'
 import { type FormState } from './actions';
 import { useIMask } from 'react-imask'; // 1. Importar o hook da nova biblioteca
@@ -14,6 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { format } from 'date-fns'; // Importando format para a data de início
+import NextImage from 'next/image';
+import { Upload } from 'lucide-react';
+import { useSession } from "next-auth/react";
 
 export type ChildEditData = {
     child_name: string | null;
@@ -21,6 +25,7 @@ export type ChildEditData = {
     allergies: string | null;
     medical_notes: string | null;
     image_authorization: boolean | null;
+    avatar_url: string | null;
     guardian_id: string | null;
     guardian_name: string | null;
     guardian_cpf: string | null;
@@ -29,6 +34,7 @@ export type ChildEditData = {
     enrollment_id: string | null;
     plan_id: number | null;
     discount: number | null;
+    surcharge: number | null;
 };
 
 interface ChildFormProps {
@@ -49,9 +55,88 @@ function SubmitButton({ text }: { text: string }) {
   );
 }
 
+// --- COMPONENTE DE UPLOAD (VERSÃO FINAL E REFORÇADA) ---
+function AvatarUpload({ initialUrl, onUpload }: { initialUrl?: string | null, onUpload: (url: string) => void }) {
+  const { data: session } = useSession();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialUrl || null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      // @ts-ignore
+      const supabaseAccessToken = session?.supabaseAccessToken;
+
+      // VERIFICAÇÃO DE SEGURANÇA: Não tenta fazer o upload se não houver token.
+      if (!supabaseAccessToken) {
+          alert("Erro de autenticação: Sessão não encontrada. Por favor, faça o login novamente.");
+          return;
+      }
+
+      const supabase = createClient(); // Cliente padrão, sem token na criação
+
+      try {
+          setIsUploading(true);
+          if (!event.target.files || event.target.files.length === 0) {
+              throw new Error('Você precisa selecionar uma imagem para fazer o upload.');
+          }
+          const file = event.target.files[0];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          const filePath = `${fileName}`;
+
+          // A MUDANÇA CRUCIAL: Passamos o token diretamente nas opções do upload
+          let { error: uploadError } = await supabase.storage
+              .from('avatars')
+              .upload(filePath, file, {
+                  headers: {
+                      authorization: `Bearer ${supabaseAccessToken}`,
+                  },
+              });
+
+          if (uploadError) {
+              // Se ainda der erro, o log será mais informativo
+              console.error("Erro detalhado do Supabase:", uploadError);
+              throw uploadError;
+          }
+
+          const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+          setAvatarUrl(publicUrl);
+          onUpload(publicUrl);
+
+      } catch (error) {
+          console.error("Erro no upload:", error);
+          alert('Erro ao fazer o upload da imagem! Verifique as permissões e o console.');
+      } finally {
+          setIsUploading(false);
+      }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label>Foto da Criança (Opcional)</Label>
+      <div className="flex items-center gap-4">
+          {avatarUrl ? (
+              // 2. Usar o novo nome 'NextImage'
+              <NextImage src={avatarUrl} alt="Avatar" width={64} height={64} className="rounded-full object-cover" />
+          ) : (
+              <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+              </div>
+          )}
+          <Button type="button" variant="outline" asChild>
+              <label htmlFor="avatarInput" className="cursor-pointer">
+                  {isUploading ? 'Enviando...' : 'Escolher Foto'}
+                  <input type="file" id="avatarInput" className="hidden" onChange={handleUpload} accept="image/*" disabled={isUploading} />
+              </label>
+          </Button>
+      </div>
+    </div>
+  );
+}
+
 export function ChildForm({ action, initialData, buttonText, childId, guardianId, enrollmentId }: ChildFormProps) {
   const initialState: FormState = { message: '', errors: {} };
   const [state, dispatch] = useActionState(action, initialState);
+  const [avatarUrl, setAvatarUrl] = useState(initialData?.avatar_url || '');
 
   // 2. Configurar o hook da máscara para o CPF
   const { ref: cpfRef } = useIMask({
@@ -76,6 +161,7 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
   return (
     <form action={dispatch} className="space-y-8">
       {/* Campos ocultos para os IDs no modo de edição */}
+      {avatarUrl && <input type="hidden" name="avatarUrl" value={avatarUrl} />}
       {childId && <input type="hidden" name="childId" value={childId} />}
       {guardianId && <input type="hidden" name="guardianId" value={guardianId} />}
       {enrollmentId && <input type="hidden" name="enrollmentId" value={enrollmentId} />}
@@ -110,6 +196,9 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
           <div className="flex items-center space-x-2">
             <Switch id="imageAuth" name="imageAuth" defaultChecked={initialData?.image_authorization ?? false} />
             <Label htmlFor="imageAuth">Autoriza o uso de imagem?</Label>
+          </div>
+          <div className="md:col-span-2">
+              <AvatarUpload initialUrl={initialData?.avatar_url} onUpload={setAvatarUrl} />
           </div>
         </CardContent>
       </Card>
@@ -188,6 +277,11 @@ export function ChildForm({ action, initialData, buttonText, childId, guardianId
                       defaultValue={initialData?.discount ?? 0}
                   />
                   {state.errors?.discount && <p className="text-sm font-medium text-destructive">{state.errors.discount}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="surcharge">Acréscimo Mensal (R$)</Label>
+                <Input id="surcharge" name="surcharge" type="number" placeholder="Ex: 25.00" step="0.01" defaultValue={initialData?.surcharge ?? 0}/>
+                {state.errors?.surcharge && <p className="text-sm font-medium text-destructive">{state.errors.surcharge}</p>}
               </div>
           </CardContent>
       </Card>

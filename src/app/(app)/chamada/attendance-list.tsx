@@ -6,6 +6,8 @@ import type { AttendanceChild } from './page'
 import { markAttendance } from './actions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Image from 'next/image'; // Importar
+import { User } from 'lucide-react';
 // 1. Importar os ícones necessários
 import { UserCheck, UserX, CheckCircle2, XCircle } from 'lucide-react'
 
@@ -41,6 +43,14 @@ export function AttendanceList({ initialChildren, today }: { initialChildren: At
         <div className="space-y-4">
           {optimisticChildren.map((child) => (
             <div key={child.id} className="flex flex-col gap-2 items-center justify-between p-3 rounded-lg border">
+              {child.avatar_url 
+              ? 
+                (<Image src={child.avatar_url} alt={`Foto de ${child.name}`} width={40} height={40} className="rounded-full object-cover" />) 
+              : 
+                (<div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                      <User className="h-5 w-5 text-muted-foreground" />
+                </div>)
+              }
               {/* 2. Lógica para renderizar o ícone e o nome */}
               <div className="flex items-center gap-3">
                 {child.status === 'present' && (
