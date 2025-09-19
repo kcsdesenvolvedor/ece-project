@@ -62,7 +62,7 @@ function AvatarUpload({ initialUrl, onUpload }: { initialUrl?: string | null, on
   const [isUploading, setIsUploading] = useState(false);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-      // @ts-ignore
+
       const supabaseAccessToken = session?.supabaseAccessToken;
 
       // VERIFICAÇÃO DE SEGURANÇA: Não tenta fazer o upload se não houver token.
@@ -84,7 +84,7 @@ function AvatarUpload({ initialUrl, onUpload }: { initialUrl?: string | null, on
           const filePath = `${fileName}`;
 
           // A MUDANÇA CRUCIAL: Passamos o token diretamente nas opções do upload
-          let { error: uploadError } = await supabase.storage
+          const { error: uploadError } = await supabase.storage
               .from('avatars')
               .upload(filePath, file, {
                   headers: {

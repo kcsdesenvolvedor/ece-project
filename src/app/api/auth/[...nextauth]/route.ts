@@ -1,4 +1,5 @@
-// src/app/api/auth/[...nextauth]/route.ts (Versão Final Focada no JWT)
+
+// src/app/api/auth/[...nextauth]/route.ts (Versão Final, Segura e sem 'any')
 
 import NextAuth, { type AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
@@ -13,32 +14,49 @@ export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
-      credentials: {},
-      async authorize(credentials: any) {
-        const supabaseAdmin = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SECRET_KEY!
-        );
+      // A seção 'credentials' é importante para a tipagem
+      credentials: {
+        email: { label: "Email", type: "text", placeholder: "jsmith" },
+        password: { label: "Password", type: "password" },
+      },
+      
+      // A tipagem correta para 'credentials', permitindo que seja undefined
+      async authorize(credentials, req) {
+        
+        // A verificação de existência é a chave
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+        
+        try {
+          const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SECRET_KEY!
+          );
 
-        const { data, error } = await supabaseAdmin.auth.signInWithPassword({
-          email: credentials.email,
-          password: credentials.password,
-        });
+          const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          });
 
-        if (error) {
-          console.error("Erro no Supabase authorize:", error.message);
+          if (error) {
+            console.error("Erro no Supabase authorize:", error.message);
+            return null;
+          }
+
+          if (data.user) {
+            return {
+              id: data.user.id,
+              email: data.user.email,
+            };
+          }
+          
+          return null;
+
+        } catch (error) {
+          console.error("Erro inesperado no authorize:", error);
           return null;
         }
-
-        if (data.user) {
-          // Retornamos apenas o essencial. O ID do Supabase Auth é a chave.
-          return {
-            id: data.user.id,
-            email: data.user.email,
-            // A role vem do próprio Supabase, não precisamos definir aqui
-          };
-        }
-        return null;
       },
     }),
   ],
@@ -87,5 +105,4 @@ export const authOptions: AuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };
