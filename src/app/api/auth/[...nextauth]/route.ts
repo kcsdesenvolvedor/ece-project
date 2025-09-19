@@ -21,7 +21,7 @@ export const authOptions: AuthOptions = {
       },
       
       // A tipagem correta para 'credentials', permitindo que seja undefined
-      async authorize(credentials, req) {
+      async authorize(credentials, _req) {
         
         // A verificação de existência é a chave
         if (!credentials?.email || !credentials?.password) {
