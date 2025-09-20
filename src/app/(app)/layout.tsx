@@ -40,7 +40,7 @@ export default function DashboardLayout({
               <span>Espaço Cuidar e Educar</span>
             </Link>
           </div>
-          <div className="flex-1">
+          <div>
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <Link
                 href="/dashboard"

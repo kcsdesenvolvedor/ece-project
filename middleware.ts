@@ -1,5 +1,0 @@
-// src/middleware.ts
-export { default } from "next-auth/middleware"
-
-// Protege as rotas da aplicação
-export const config = { matcher: ["/dashboard/:path*", "/criancas/:path*", "/chamada/:path*", "/configuracoes/:path*"] }
