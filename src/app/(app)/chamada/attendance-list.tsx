@@ -59,7 +59,7 @@ export function AttendanceList({ initialChildren, today }: { initialChildren: At
                 {child.status === 'absent' && (
                   <XCircle className="h-6 w-6 text-red-500" />
                 )}
-                <span className="font-medium text-lg">{child.name}</span>
+                <span className="font-medium text-lg">{child.name.toUpperCase()}</span>
               </div>
               
               {/* Botões de Ação */}

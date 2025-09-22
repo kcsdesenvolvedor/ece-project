@@ -89,6 +89,7 @@ export async function registerChild(prevState: FormState, formData: FormData): P
     child_allergies: data.allergies,
     child_medical_notes: data.medicalNotes,
     child_image_auth: data.imageAuth,
+    p_avatar_url: data.avatarUrl,
     guardian_name: data.guardianName,
     guardian_cpf: data.guardianCpf,
     guardian_phone: data.guardianPhone,
@@ -99,12 +100,11 @@ export async function registerChild(prevState: FormState, formData: FormData): P
     p_surcharge: data.surcharge ?? 0,
   })
 
-
   if (error) {
     console.error('Erro ao cadastrar criança:', error)
     return { message: 'Erro do banco de dados: Não foi possível realizar o cadastro.' }
   }
-
+ 
   revalidatePath('/dashboard') // Atualiza o cache do dashboard
   revalidatePath('/criancas')  // Atualiza o cache da lista de crianças
   redirect('/dashboard') // Redireciona para o dashboard com mensagem de sucesso (a ser implementada)
@@ -217,3 +217,10 @@ export async function updateChild(prevState: FormState, formData: FormData): Pro
     revalidatePath(`/criancas/${childId}`);
     redirect('/criancas');
   }
+
+
+  export async function callTestFunction() {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('test_function', { p_name: 'World' });
+    console.log({ data, error });
+}

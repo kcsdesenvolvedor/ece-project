@@ -32,12 +32,12 @@ export function ChildrenCardList({ initialChildren: children }: { initialChildre
       {children && children.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {children.map((child) => (
-            <Card key={child.id} className="flex flex-col">
+            <Card key={child.id} className="flex flex-col text-white bg-gradient-to-r from-slate-900 to-slate-700">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>{child.name}</CardTitle>
-                <Button variant="ghost" size="icon" asChild>
+                <Button className='hover:bg-slate-800' variant="ghost" size="icon" asChild>
                     <Link href={`/criancas/${child.id}/edit`}>
-                        <FilePenLine className="h-5 w-5 text-muted-foreground" />
+                        <FilePenLine className="h-5 w-5 text-white" />
                     </Link>
                 </Button>
               </CardHeader>
@@ -52,13 +52,13 @@ export function ChildrenCardList({ initialChildren: children }: { initialChildre
               </CardContent>
               <CardFooter className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" asChild>
-                    <Link href={`/criancas/${child.id}`}>Ver Detalhes</Link>
+                    <Link className='text-black' href={`/criancas/${child.id}`}>Ver Detalhes</Link>
                 </Button>
 
                 {/* AlertDialog para a confirmação de exclusão */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm">
+                    <Button className='cursor-pointer' variant="destructive" size="sm">
                       Excluir
                     </Button>
                   </AlertDialogTrigger>
